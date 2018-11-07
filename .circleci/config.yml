@@ -1,0 +1,28 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: docker:1.13.1
+    working_directory: ~/app
+    steps:
+      - checkout
+      - setup_remote_docker
+
+      - run:
+          name: Build image
+          command: |
+            docker build --rm=false -t loffek/serviceb .
+
+      - run:
+          name: Test
+          command: |
+            docker run loffek/serviceb ./test.sh
+
+      - deploy:
+          name: Publish to DockerHub
+          command: |
+            docker login -u $DOCKER_HUB_USER_ID -p $DOCKER_HUB_PWD
+            docker tag loffek/serviceb $DOCKER_HUB_USER_ID/servicea:$CIRCLE_SHA1
+            docker tag loffek/serviceb $DOCKER_HUB_USER_ID/servicea:latest
+            docker push $DOCKER_HUB_USER_ID/serviceb:$CIRCLE_SHA1
+            docker push $DOCKER_HUB_USER_ID/serviceb:latest

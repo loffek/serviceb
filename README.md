@@ -1,2 +1,3 @@
 # serviceb
-test service b
+
+gateway server to servicea
