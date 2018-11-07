@@ -22,7 +22,7 @@ jobs:
           name: Publish to DockerHub
           command: |
             docker login -u $DOCKER_HUB_USER_ID -p $DOCKER_HUB_PWD
-            docker tag loffek/serviceb $DOCKER_HUB_USER_ID/servicea:$CIRCLE_SHA1
-            docker tag loffek/serviceb $DOCKER_HUB_USER_ID/servicea:latest
+            docker tag loffek/serviceb $DOCKER_HUB_USER_ID/serviceb:$CIRCLE_SHA1
+            docker tag loffek/serviceb $DOCKER_HUB_USER_ID/serviceb:latest
             docker push $DOCKER_HUB_USER_ID/serviceb:$CIRCLE_SHA1
             docker push $DOCKER_HUB_USER_ID/serviceb:latest
