@@ -30,7 +30,7 @@ jobs:
           command: |
             curl -u ${CIRCLE_API_USER_TOKEN}: \
                  -d build_parameters[CIRCLE_JOB]=build \
-                 -d build_parameters[SERVICE_B_TAG]=$CIRCLE_SHA1
+                 -d build_parameters[SERVICE_B_TAG]=$CIRCLE_SHA1 \
                  https://circleci.com/api/v1.1/project/github/$CIRCLE_PROJECT_USERNAME/servicecomposer/tree/master
 
       # Poll for success
