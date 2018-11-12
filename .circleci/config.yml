@@ -11,7 +11,8 @@ jobs:
           command: ./test.sh
 
   integrationtest:
-    - image: loffek/testrunner-client:v0.1
+    docker:
+      - image: loffek/testrunner-client:v0.1
         auth:
           username: $DOCKER_HUB_USER_ID
           password: $DOCKER_HUB_PWD
