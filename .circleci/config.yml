@@ -20,15 +20,18 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
+
       - run:
-          name: Build image
-          command: |
-            docker build --rm=false -t loffek/serviceb .
+          name: Login
+          command: docker login -u $DOCKER_HUB_USER_ID -p $DOCKER_HUB_PWD
+
+      - run:
+          name: Build
+          command: docker build --rm=false -t loffek/serviceb .
 
       - deploy:
-          name: Publish test image to DockerHub
+          name: Publish Test Image
           command: |
-            docker login -u $DOCKER_HUB_USER_ID -p $DOCKER_HUB_PWD
             docker tag loffek/serviceb $DOCKER_HUB_USER_ID/serviceb:$CIRCLE_SHA1
             docker push $DOCKER_HUB_USER_ID/serviceb:$CIRCLE_SHA1
 
@@ -37,18 +40,16 @@ jobs:
           command: |
             integrationtest \
               --token=$CIRCLE_API_TOKEN \
-              --build_parameters \
-                ENVIRONMENT=$([ $CIRCLE_BRANCH = master ] echo "master" || echo "staging") \
-                SERVICE_B_TAG=$CIRCLE_SHA1
+              --build_parameters SERVICE_B_TAG=$CIRCLE_SHA1
 
       - deploy:
-          name: Publish release image to DockerHub
+          name: Publish Release Image to DockerHub
           command: |
-            if [ $CIRCLE_BRANCH = master ] || [ $CIRCLE_BRANCH = staging ]; then
-              docker tag loffek/serviceb $DOCKER_HUB_USER_ID/serviceb:$CIRCLE_BRANCH
-              docker push $DOCKER_HUB_USER_ID/serviceb:$CIRCLE_BRANCH
+            if [ $CIRCLE_BRANCH = master ]; then
+              docker tag loffek/serviceb $DOCKER_HUB_USER_ID/serviceb:master
+              docker push $DOCKER_HUB_USER_ID/serviceb:master
             else
-              echo "Branch is not staging or master - skipping."
+              echo "Branch is not master - skipping."
             fi
 
 workflows:
