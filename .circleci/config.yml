@@ -11,22 +11,21 @@ jobs:
           command: ./test.sh
 
   integrationtest:
-    docker:
-      - image: loffek/testrunner-client:v0.1
+    - image: loffek/testrunner-client:v0.1
         auth:
           username: $DOCKER_HUB_USER_ID
           password: $DOCKER_HUB_PWD
+
     steps:
       - checkout
       - setup_remote_docker
-
       - run:
           name: Build image
           command: |
             docker build --rm=false -t loffek/serviceb .
 
       - deploy:
-          name: Publish to DockerHub
+          name: Publish test image to DockerHub
           command: |
             docker login -u $DOCKER_HUB_USER_ID -p $DOCKER_HUB_PWD
             docker tag loffek/serviceb $DOCKER_HUB_USER_ID/serviceb:$CIRCLE_SHA1
@@ -35,7 +34,21 @@ jobs:
       - deploy:
           name: Integration test
           command: |
-            integrationtest --token=$CIRCLE_API_TOKEN --build_parameters SERVICE_B_TAG=$CIRCLE_SHA1
+            integrationtest \
+              --token=$CIRCLE_API_TOKEN \
+              --build_parameters \
+                ENVIRONMENT=$([ $CIRCLE_BRANCH = master ] echo "master" || echo "staging") \
+                SERVICE_B_TAG=$CIRCLE_SHA1
+
+      - deploy:
+          name: Publish release image to DockerHub
+          command: |
+            if [ $CIRCLE_BRANCH = master ] || [ $CIRCLE_BRANCH = staging ]; then
+              docker tag loffek/serviceb $DOCKER_HUB_USER_ID/serviceb:$CIRCLE_BRANCH
+              docker push $DOCKER_HUB_USER_ID/serviceb:$CIRCLE_BRANCH
+            else
+              echo "Branch is not staging or master - skipping."
+            fi
 
 workflows:
   version: 2
