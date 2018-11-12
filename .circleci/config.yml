@@ -12,7 +12,7 @@ jobs:
 
   integrationtest:
     docker:
-      - image: loffek/testrunner-client:v0.1
+      - image: loffek/testrunner-client:v0.2
         auth:
           username: $DOCKER_HUB_USER_ID
           password: $DOCKER_HUB_PWD
