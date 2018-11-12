@@ -19,7 +19,7 @@ const handler = (req, res) => {
         client.write(body)
       })
       client.on('data', chunk => {
-        res.write(`${chunk} `)
+        res.write(chunk)
         client.destroy()
       })
       client.on('close', () => {
