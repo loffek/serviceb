@@ -35,17 +35,11 @@ jobs:
       - deploy:
           name: Integration test
           command: |
-            integrationtest --token=CIRCLE_API_TOKEN --build_args SERVICE_B_TAG=$CIRCLE_SHA1
+            integrationtest --token=CIRCLE_API_TOKEN --build_parameters SERVICE_B_TAG=$CIRCLE_SHA1
 
 workflows:
   version: 2
   build_and_integrationtest:
     jobs:
       - build
-      - integrationtest
-  just_build:
-    jobs:
-      - build
-  just_integration_test:
-    jobs:
       - integrationtest
