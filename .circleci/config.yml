@@ -2,8 +2,20 @@ version: 2
 jobs:
   build:
     docker:
-      - image: docker:1.13.1
+      - image: circleci/node:8.12.0
     working_directory: ~/app
+    steps:
+      - checkout
+      - run:
+          name: Test
+          command: ./test.sh
+
+  integrationtest:
+    docker:
+      - image: loffek/testrunner-client:v0.1
+        auth:
+          username: $DOCKER_HUB_USER_ID
+          password: $DOCKER_HUB_PWD
     steps:
       - checkout
       - setup_remote_docker
@@ -12,11 +24,6 @@ jobs:
           name: Build image
           command: |
             docker build --rm=false -t loffek/serviceb .
-
-      - run:
-          name: Test
-          command: |
-            docker run loffek/serviceb ./test.sh
 
       - deploy:
           name: Publish to DockerHub
@@ -28,12 +35,17 @@ jobs:
       - deploy:
           name: Integration test
           command: |
-            curl -u ${PERSONAL_API_TOKEN}: \
-                 -d build_parameters[CIRCLE_JOB]=build \
-                 -d build_parameters[SERVICE_B_TAG]=$CIRCLE_SHA1 \
-                 https://circleci.com/api/v1.1/project/github/$CIRCLE_PROJECT_USERNAME/servicecomposer/tree/master
+            integrationtest --token=CIRCLE_API_TOKEN --build_args SERVICE_B_TAG=$CIRCLE_SHA1
 
-      # Poll for success
-      # Fail or succeed the test
-
-      # Only if branch is master, publish with tag "latest"
+workflows:
+  version: 2
+  build_and_integrationtest:
+    jobs:
+      - build
+      - integrationtest
+  just_build:
+    jobs:
+      - build
+  just_integration_test:
+    jobs:
+      - integrationtest
